@@ -1,0 +1,91 @@
+name: Sync OpenAPI from API
+
+on:
+  schedule:
+    # Ejecuta cada hora para verificar actualizaciones
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      api_repo:
+        description: 'API repository (owner/repo)'
+        required: false
+        default: 'SherryLabs/sherry-api'
+      branch:
+        description: 'Branch to fetch from'
+        required: false
+        default: 'main'
+  repository_dispatch:
+    types: [openapi-updated]
+
+jobs:
+  sync-openapi:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Mintlify docs
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine source repository
+        id: repo_info
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "repo=${{ github.event.client_payload.api_repo || 'SherryLabs/sherry-api' }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.client_payload.branch || 'main' }}" >> $GITHUB_OUTPUT
+          else
+            echo "repo=${{ github.event.inputs.api_repo || 'SherryLabs/sherry-api' }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.inputs.branch || 'main' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download latest OpenAPI
+        run: |
+          API_REPO="${{ steps.repo_info.outputs.repo }}"
+          BRANCH="${{ steps.repo_info.outputs.branch }}"
+          echo "📥 Downloading OpenAPI from $API_REPO (branch: $BRANCH)"
+          curl -H "Accept: application/vnd.github.v3.raw" \
+            -L "https://api.github.com/repos/$API_REPO/contents/docs/openapi.json?ref=$BRANCH" \
+            -o openapi.json
+          
+          if [ ! -f "openapi.json" ] || [ ! -s "openapi.json" ]; then
+            echo "❌ Error: Failed to download openapi.json"
+            exit 1
+          fi
+          
+          echo "✅ OpenAPI downloaded successfully"
+          echo "📊 File size: $(ls -lh openapi.json | awk '{print $5}')"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet openapi.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected in OpenAPI file"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected in OpenAPI file"
+            echo "📝 Changes:"
+            git diff --stat openapi.json || true
+          fi
+
+      - name: Commit if changed
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add openapi.json
+          git commit -m "chore: sync OpenAPI from API repo [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ OpenAPI updated successfully"
+            echo "🚀 Mintlify will automatically deploy the changes"
+          else
+            echo "ℹ️ No changes detected - OpenAPI is up to date"
+          fi
+
