@@ -3,8 +3,8 @@
   "theme": "mint",
   "name": "Relayer",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "dark": "/logo/logo.png",
+    "light": "/logo/logo.png"
   },
   "favicon": "/favicon.svg",
   "colors": {
@@ -55,7 +55,7 @@
         },
         {
           "anchor": "GitHub",
-          "href": "https://github.com/relayer",
+          "href": "https://github.com/SherryLabs",
           "icon": "github"
         }
       ]
