@@ -1,43 +1,80 @@
-# Mintlify Starter Kit
+# Mintlify Documentation Setup
 
-Use the starter kit to get your docs deployed and ready to customize.
+Esta carpeta contiene todos los archivos necesarios para crear el repositorio de documentación con Mintlify.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Archivos Incluidos
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+- `mint.json` - Configuración principal de Mintlify
+- `introduction.mdx` - Página de introducción
+- `authentication.mdx` - Documentación de autenticación
+- `quickstart.mdx` - Guía de inicio rápido
+- `api-reference.mdx` - Referencia de API (usa OpenAPI)
+- `.github/workflows/sync-openapi.yml` - Workflow para sincronizar OpenAPI automáticamente
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+## Pasos para Configurar
 
-## Development
+### 1. Crear el Repositorio de Mintlify
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+```bash
+# Opción A: Usar el starter de Mintlify
+npx create-mint@latest relayer-docs
+cd relayer-docs
 
+# Opción B: Crear manualmente
+mkdir relayer-docs
+cd relayer-docs
+git init
 ```
-npm i -g mint
+
+### 2. Copiar Archivos
+
+Copia todos los archivos de esta carpeta `mintlify/` al nuevo repositorio:
+
+```bash
+# Desde el repositorio de Mintlify
+cp -r /path/to/sherry-api/mintlify/* .
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+### 3. Configurar el Workflow
 
+Edita `.github/workflows/sync-openapi.yml` y reemplaza `tu-org/sherry-api` con el nombre real de tu repositorio:
+
+```yaml
+API_REPO: ${{ github.event.inputs.api_repo || 'tu-organizacion/relayer-api' }}
 ```
-mint dev
+
+### 4. Descargar OpenAPI Inicial
+
+Descarga el archivo OpenAPI inicial:
+
+```bash
+curl -L "https://raw.githubusercontent.com/tu-org/relayer-api/main/docs/openapi.json" -o openapi.json
 ```
 
-View your local preview at `http://localhost:3000`.
+### 5. Configurar Mintlify
 
-## Publishing changes
+1. Ve a [mintlify.com](https://mintlify.com)
+2. Crea una cuenta o inicia sesión
+3. Crea un nuevo proyecto
+4. Conecta tu repositorio de GitHub (relayer-docs)
+5. Mintlify detectará automáticamente `mint.json`
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+### 6. Personalizar
 
-## Need help?
+- Actualiza los links en `mint.json` (logo, favicon, redes sociales)
+- Añade más páginas según necesites
+- Personaliza colores y branding
 
-### Troubleshooting
+## Sincronización Automática
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+El workflow `sync-openapi.yml` se ejecutará:
+- Automáticamente cada hora para verificar actualizaciones
+- Manualmente usando `workflow_dispatch`
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+Cuando detecte cambios en el OpenAPI, hará commit automático y Mintlify desplegará automáticamente.
+
+## Notas
+
+- El archivo `openapi.json` debe estar en la raíz del repositorio de Mintlify
+- Asegúrate de que el workflow tenga permisos de escritura en GitHub
+- Los cambios en `mint.json` y páginas MDX también triggeran deploy automático en Mintlify
