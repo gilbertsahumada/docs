@@ -1,0 +1,81 @@
+---
+title: Authentication
+description: Learn how to authenticate with the Relayer
+---
+
+# Authentication
+
+The Relayer uses API keys for authentication. Include your API key in the `Authorization` header of every request.
+
+## API Key Format
+
+Include your API key in the `Authorization` header using the following format:
+
+```
+Authorization: ApiKey <your_api_key>
+```
+
+## Getting an API Key
+
+To get an API key:
+
+1. Contact your Relayer administrator
+2. Provide your use case and requirements
+3. Receive your API key (store it securely!)
+
+## Using Your API Key
+
+Include the API key in all requests:
+
+<CodeGroup>
+
+```bash curl
+curl -X GET https://api.relayer.fi/v1/metadata/types \
+  -H "Authorization: ApiKey your_api_key_here"
+```
+
+```javascript
+fetch('https://api.relayer.fi/v1/metadata/types', {
+  headers: {
+    'Authorization': 'ApiKey your_api_key_here'
+  }
+})
+```
+
+```python
+import requests
+
+headers = {
+    'Authorization': 'ApiKey your_api_key_here'
+}
+
+response = requests.get(
+    'https://api.relayer.fi/v1/metadata/types',
+    headers=headers
+)
+```
+
+</CodeGroup>
+
+## Security Best Practices
+
+<Warning>
+**Never commit API keys** to version control or share them publicly.
+</Warning>
+
+- **Use environment variables** to store API keys
+- **Rotate keys** regularly
+- **Don't share** API keys in public forums or support tickets
+- **Use different keys** for development and production environments
+
+## API Key Scopes
+
+Different API keys have different scopes and permissions:
+
+- **Admin Keys**: Full access to all endpoints
+- **Internal Keys**: Access to internal endpoints
+- **Integrator Keys**: Access to integrator-specific endpoints
+- **Client Keys**: Limited access for specific integrators
+
+Contact your administrator to determine which type of key you need.
+
