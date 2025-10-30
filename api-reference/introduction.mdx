@@ -1,33 +1,60 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'Welcome to the API Reference'
+description: 'Welcome to the API Reference'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
-
-## Welcome
-
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+<Cards>
+  <Card
+    title="Quickstart"
+    icon="zap"
+    href="/documentation/quickstart"
+  >
+    Make your first request in minutes
+  </Card>
+  <Card
+    title="Authentication"
+    icon="lock"
+    href="/documentation/authentication"
+  >
+    How to use API keys with Relayer
+  </Card>
+</Cards>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require an API key in the `Authorization` header.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+<CodeGroup>
+
+```bash curl
+curl -X GET https://api.relayer.fi/v1/metadata/types \
+  -H "Authorization: ApiKey your_api_key_here"
 ```
+
+```javascript
+fetch('https://api.relayer.fi/v1/metadata/types', {
+  headers: { 'Authorization': 'ApiKey your_api_key_here' }
+})
+```
+
+```python
+import requests
+
+headers = { 'Authorization': 'ApiKey your_api_key_here' }
+requests.get('https://api.relayer.fi/v1/metadata/types', headers=headers)
+```
+
+</CodeGroup>
+
+## Base URL
+
+All requests are made to:
+
+```
+https://api.relayer.fi/v1
+```
+
+## Next steps
+
+- Learn about [Authentication](/documentation/authentication)
+- Follow the [Quickstart](/documentation/quickstart)
