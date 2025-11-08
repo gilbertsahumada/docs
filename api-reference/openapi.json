@@ -364,7 +364,7 @@
             "name": "chainId",
             "required": true,
             "in": "query",
-            "description": "Chain ID (43114 for Avalanche)",
+            "description": "Chain ID (e.g., 43114 for Avalanche, 1 for Ethereum, 137 for Polygon)",
             "schema": {
               "example": 43114,
               "type": "number",
@@ -412,7 +412,7 @@
             "api-key": []
           }
         ],
-        "summary": "Get AAVE markets data",
+        "summary": "Get lending markets data",
         "tags": [
           "Defi"
         ]
@@ -420,7 +420,7 @@
     },
     "/defi/lending/supply": {
       "post": {
-        "description": "Prepare a transaction to supply assets to AAVE lending pool",
+        "description": "Prepare a transaction to supply assets to lending protocol",
         "operationId": "LendingController_supplyAsset",
         "parameters": [],
         "requestBody": {
@@ -431,9 +431,9 @@
                 "$ref": "#/components/schemas/SupplyRequestDto"
               },
               "examples": {
-                "supply-avax": {
-                  "summary": "Supply AVAX",
-                  "description": "Supply native AVAX to AAVE",
+                "supply-native": {
+                  "summary": "Supply native asset",
+                  "description": "Supply native chain asset (e.g., AVAX on Avalanche)",
                   "value": {
                     "userAddress": "0xb322E239E5A32724633A595b8f8657F9cbb307B2",
                     "tokenAddress": "avax",
@@ -441,9 +441,9 @@
                     "chainId": 43114
                   }
                 },
-                "supply-usdc": {
-                  "summary": "Supply USDC",
-                  "description": "Supply USDC token to AAVE",
+                "supply-token": {
+                  "summary": "Supply token",
+                  "description": "Supply ERC20 token to lending protocol",
                   "value": {
                     "userAddress": "0xb322E239E5A32724633A595b8f8657F9cbb307B2",
                     "tokenAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
@@ -482,7 +482,7 @@
             "api-key": []
           }
         ],
-        "summary": "Supply asset to AAVE",
+        "summary": "Supply asset to lending protocol",
         "tags": [
           "Defi"
         ]
@@ -490,7 +490,7 @@
     },
     "/defi/lending/positions": {
       "get": {
-        "description": "Retrieve user supplies, borrows, and health factor from AAVE",
+        "description": "Retrieve user supplies, borrows, and health factor from lending protocols",
         "operationId": "LendingController_getUserPositions",
         "parameters": [
           {
@@ -507,7 +507,7 @@
             "name": "chainId",
             "required": true,
             "in": "query",
-            "description": "Chain ID (43114 for Avalanche)",
+            "description": "Chain ID (e.g., 43114 for Avalanche, 1 for Ethereum, 137 for Polygon)",
             "schema": {
               "example": 43114,
               "type": "number"
@@ -641,7 +641,7 @@
     },
     "/defi/lending/supply-avax": {
       "post": {
-        "description": "Prepare a transaction to supply AVAX to AAVE lending pool",
+        "description": "Prepare a transaction to supply AVAX to lending protocol",
         "operationId": "LendingController_supplyAvax",
         "parameters": [],
         "requestBody": {
@@ -663,7 +663,7 @@
                   "chainId": {
                     "type": "number",
                     "example": 43114,
-                    "description": "Chain ID (43114 for Avalanche)"
+                    "description": "Chain ID (e.g., 43114 for Avalanche, 43113 for Fuji testnet)"
                   }
                 },
                 "required": [
@@ -762,7 +762,7 @@
             "api-key": []
           }
         ],
-        "summary": "Supply AVAX to AAVE",
+        "summary": "Supply AVAX to lending protocol",
         "tags": [
           "Defi"
         ]
@@ -770,7 +770,7 @@
     },
     "/defi/lending/withdraw-avax": {
       "post": {
-        "description": "Prepare a transaction to withdraw AVAX from AAVE lending pool",
+        "description": "Prepare a transaction to withdraw AVAX from lending protocol",
         "operationId": "LendingController_withdrawAvax",
         "parameters": [],
         "requestBody": {
@@ -792,7 +792,7 @@
                   "chainId": {
                     "type": "number",
                     "example": 43114,
-                    "description": "Chain ID (43114 for Avalanche)"
+                    "description": "Chain ID (e.g., 43114 for Avalanche, 43113 for Fuji testnet)"
                   }
                 },
                 "required": [
@@ -896,7 +896,7 @@
             "api-key": []
           }
         ],
-        "summary": "Withdraw AVAX from AAVE",
+        "summary": "Withdraw AVAX from lending protocol",
         "tags": [
           "Defi"
         ]
@@ -904,7 +904,7 @@
     },
     "/defi/lending/my-avax-supply": {
       "get": {
-        "description": "Get the amount of AVAX the user has supplied to AAVE. Supports Avalanche mainnet (43114) and Fuji testnet (43113)",
+        "description": "Get the amount of AVAX the user has supplied to lending protocols",
         "operationId": "LendingController_getMyAvaxSupply",
         "parameters": [
           {
@@ -921,12 +921,9 @@
             "name": "chainId",
             "required": true,
             "in": "query",
-            "description": "Chain ID (43114 for Avalanche, 43113 for Fuji testnet)",
+            "description": "Chain ID (e.g., 43114 for Avalanche, 43113 for Fuji testnet)",
             "schema": {
-              "enum": [
-                43114,
-                43113
-              ],
+              "example": 43114,
               "type": "number"
             }
           }
@@ -1060,26 +1057,637 @@
           "Defi"
         ]
       }
+    },
+    "/transactions/sign": {
+      "post": {
+        "description": "Signs a generic transaction using a wallet account that belongs to the integrator. The transaction must be pre-serialized. Only accounts owned by the integrator associated with the API key can be used.",
+        "operationId": "TransactionsController_signTransaction",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction signing parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignTransactionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedTransactionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key"
+          },
+          "403": {
+            "description": "Forbidden - Account does not belong to this integrator"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Sign a generic transaction",
+        "tags": [
+          "Transactions"
+        ]
+      },
+      "get": {
+        "description": "Lists signed transactions for the integrator. Can be filtered by status.",
+        "operationId": "TransactionsController_listSignedTransactions",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "enum": [
+                "pending",
+                "confirmed",
+                "broadcasted",
+                "failed",
+                "expired",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of transactions to return (default: 20, max: 100)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset for pagination (default: 0)",
+            "schema": {
+              "minimum": 0,
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/SignedTransactionResponseDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List signed transactions",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/sign/transfer/native": {
+      "post": {
+        "description": "Signs a native token transfer (AVAX, ETH, etc.) transaction. The transaction is built automatically and signed with Turnkey. Only accounts owned by the integrator can be used.",
+        "operationId": "TransactionsController_signNativeTransfer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Native transfer parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferNativeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedTransactionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or insufficient balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Account does not belong to this integrator"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Sign a native token transfer",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/sign/transfer/token": {
+      "post": {
+        "description": "Signs an ERC20 token transfer transaction. The transaction is built automatically and signed with Turnkey. Only accounts owned by the integrator can be used.",
+        "operationId": "TransactionsController_signTokenTransfer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Token transfer parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedTransactionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or insufficient token balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Account does not belong to this integrator"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Sign an ERC20 token transfer",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/sign/{transactionId}": {
+      "get": {
+        "description": "Retrieves details of a signed transaction. Only transactions belonging to the integrator can be accessed.",
+        "operationId": "TransactionsController_getSignedTransaction",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "path",
+            "description": "Transaction ID",
+            "schema": {
+              "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SignedTransactionResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Transaction does not belong to this integrator"
+          },
+          "404": {
+            "description": "Transaction not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get signed transaction details",
+        "tags": [
+          "Transactions"
+        ]
+      },
+      "delete": {
+        "description": "Cancels a pending transaction. Only pending transactions can be cancelled. Only transactions belonging to the integrator can be cancelled.",
+        "operationId": "TransactionsController_cancelSignedTransaction",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "path",
+            "description": "Transaction ID",
+            "schema": {
+              "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction cancelled successfully"
+          },
+          "400": {
+            "description": "Bad Request - Transaction cannot be cancelled"
+          },
+          "403": {
+            "description": "Forbidden - Transaction does not belong to this integrator"
+          },
+          "404": {
+            "description": "Transaction not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Cancel a pending transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/broadcast/{transactionId}": {
+      "post": {
+        "description": "Broadcasts a previously signed transaction to the blockchain. Only transactions belonging to the integrator can be broadcasted. The transaction must be in pending status and not expired.",
+        "operationId": "TransactionsController_broadcastTransaction",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "path",
+            "description": "Transaction ID",
+            "schema": {
+              "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Broadcast parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BroadcastResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Transaction cannot be broadcasted (expired or wrong status)"
+          },
+          "403": {
+            "description": "Forbidden - Transaction does not belong to this integrator"
+          },
+          "404": {
+            "description": "Transaction not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Broadcast a signed transaction",
+        "tags": [
+          "Transactions"
+        ]
+      },
+      "get": {
+        "description": "Retrieves the status of a broadcasted transaction including confirmations. Only transactions belonging to the integrator can be accessed.",
+        "operationId": "TransactionsController_getBroadcastStatus",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "path",
+            "description": "Transaction ID",
+            "schema": {
+              "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TransactionStatusResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Transaction does not belong to this integrator"
+          },
+          "404": {
+            "description": "Transaction not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get broadcast status",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/broadcast/raw": {
+      "post": {
+        "description": "Broadcasts a raw signed transaction directly to the blockchain without saving it. Use this for transactions signed outside of this API.",
+        "operationId": "TransactionsController_broadcastRawTransaction",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Raw transaction parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastRawDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BroadcastRawResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid transaction"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Broadcast a raw signed transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/broadcast/{transactionId}/retry": {
+      "post": {
+        "description": "Retries broadcasting a transaction that previously failed. Only failed transactions can be retried. Only transactions belonging to the integrator can be retried.",
+        "operationId": "TransactionsController_retryBroadcast",
+        "parameters": [
+          {
+            "name": "transactionId",
+            "required": true,
+            "in": "path",
+            "description": "Transaction ID",
+            "schema": {
+              "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Broadcast parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BroadcastResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Transaction cannot be retried"
+          },
+          "403": {
+            "description": "Forbidden - Transaction does not belong to this integrator"
+          },
+          "404": {
+            "description": "Transaction not found"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Retry broadcasting a failed transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
     }
   },
   "info": {
-    "title": "Sherry API",
-    "description": "Documentación de la Sherry API",
+    "title": "Relayer",
+    "description": "Documentación de la Relayer",
     "version": "1.0",
     "contact": {}
   },
   "tags": [],
   "servers": [
     {
-      "url": "https://api.relayer.fi/v1",
-      "description": "Production server"
-    },
-    {
       "url": "http://localhost:4000/v1",
       "description": "Development server"
     },
     {
-      "url": "https://api.sherry.social/v1",
+      "url": "https://api.relayer.fi/v1",
       "description": "Production server"
     }
   ],
@@ -1146,6 +1754,35 @@
           "id_integrator",
           "name",
           "description"
+        ]
+      },
+      "ApiResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "statusCode": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "statusCode",
+          "timestamp"
         ]
       },
       "IntegratorResponseDto": {
@@ -1225,35 +1862,6 @@
         "required": [
           "name",
           "email"
-        ]
-      },
-      "ApiResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "statusCode": {
-            "type": "number"
-          },
-          "timestamp": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "success",
-          "message",
-          "statusCode",
-          "timestamp"
         ]
       },
       "WalletAddressDto": {
@@ -2999,6 +3607,340 @@
           "message",
           "serializedTransaction",
           "gasEstimation"
+        ]
+      },
+      "SignedTransactionResponseDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID for confirmation",
+            "example": "tx-uuid-abc123"
+          },
+          "signedTransaction": {
+            "type": "string",
+            "description": "Signed transaction (hex string)",
+            "example": "0x..."
+          },
+          "status": {
+            "type": "string",
+            "description": "Transaction status",
+            "example": "pending",
+            "enum": [
+              "pending",
+              "confirmed",
+              "broadcasted",
+              "failed",
+              "expired",
+              "cancelled"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "description": "From address",
+            "example": "0x123..."
+          },
+          "to": {
+            "type": "string",
+            "description": "To address",
+            "example": "0x456..."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Amount transferred",
+            "example": "1.5"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 43114
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "Token address (if token transfer)",
+            "example": "0x..."
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Expiration timestamp",
+            "example": "2024-01-01T12:15:00Z"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Creation timestamp",
+            "example": "2024-01-01T12:00:00Z"
+          }
+        },
+        "required": [
+          "transactionId",
+          "signedTransaction",
+          "status",
+          "from",
+          "to",
+          "amount",
+          "chainId",
+          "expiresAt",
+          "createdAt"
+        ]
+      },
+      "SignTransactionDto": {
+        "type": "object",
+        "properties": {
+          "signWith": {
+            "type": "string",
+            "description": "Wallet account ID or address to sign the transaction with",
+            "example": "account-abc123"
+          },
+          "unsignedTransaction": {
+            "type": "string",
+            "description": "Raw unsigned transaction to be signed (hex string)",
+            "example": "0x..."
+          },
+          "type": {
+            "type": "string",
+            "description": "Transaction type",
+            "enum": [
+              "TRANSACTION_TYPE_ETHEREUM",
+              "TRANSACTION_TYPE_SOLANA",
+              "TRANSACTION_TYPE_TRON"
+            ],
+            "example": "TRANSACTION_TYPE_ETHEREUM"
+          }
+        },
+        "required": [
+          "signWith",
+          "unsignedTransaction",
+          "type"
+        ]
+      },
+      "TransferNativeDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source account address or walletAccountId",
+            "example": "0x123..."
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination address",
+            "example": "0x456..."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Amount to transfer (in decimal format)",
+            "example": "1.5"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 43114
+          },
+          "signWith": {
+            "type": "string",
+            "description": "Account to sign with (if from is not provided)",
+            "example": "account-abc123"
+          },
+          "gasPrice": {
+            "type": "string",
+            "description": "Gas price (optional, will be estimated if not provided)",
+            "example": "25000000000"
+          },
+          "gasLimit": {
+            "type": "string",
+            "description": "Gas limit (optional, will be estimated if not provided)",
+            "example": "21000"
+          }
+        },
+        "required": [
+          "to",
+          "amount",
+          "chainId"
+        ]
+      },
+      "TransferTokenDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source account address or walletAccountId",
+            "example": "0x123..."
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination address",
+            "example": "0x456..."
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "Token contract address (ERC20)",
+            "example": "0x..."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Amount to transfer (in decimal format)",
+            "example": "100.5"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 43114
+          },
+          "signWith": {
+            "type": "string",
+            "description": "Account to sign with (if from is not provided)",
+            "example": "account-abc123"
+          },
+          "gasPrice": {
+            "type": "string",
+            "description": "Gas price (optional)",
+            "example": "25000000000"
+          },
+          "gasLimit": {
+            "type": "string",
+            "description": "Gas limit (optional)",
+            "example": "65000"
+          }
+        },
+        "required": [
+          "to",
+          "tokenAddress",
+          "amount",
+          "chainId"
+        ]
+      },
+      "BroadcastResponseDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID",
+            "example": "tx-uuid-abc123"
+          },
+          "txHash": {
+            "type": "string",
+            "description": "Transaction hash",
+            "example": "0x789..."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status",
+            "example": "broadcasted"
+          },
+          "broadcastedAt": {
+            "type": "string",
+            "description": "Broadcast timestamp",
+            "example": "2024-01-01T12:10:00Z"
+          }
+        },
+        "required": [
+          "transactionId",
+          "txHash",
+          "status",
+          "broadcastedAt"
+        ]
+      },
+      "BroadcastDto": {
+        "type": "object",
+        "properties": {
+          "rpcUrl": {
+            "type": "string",
+            "description": "RPC URL for broadcasting (optional, uses default if not provided)",
+            "example": "https://api.avax.network/ext/bc/C/rpc"
+          }
+        }
+      },
+      "BroadcastRawResponseDto": {
+        "type": "object",
+        "properties": {
+          "txHash": {
+            "type": "string",
+            "description": "Transaction hash",
+            "example": "0x789..."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status",
+            "example": "broadcasted"
+          },
+          "broadcastedAt": {
+            "type": "string",
+            "description": "Broadcast timestamp",
+            "example": "2024-01-01T12:10:00Z"
+          }
+        },
+        "required": [
+          "txHash",
+          "status",
+          "broadcastedAt"
+        ]
+      },
+      "BroadcastRawDto": {
+        "type": "object",
+        "properties": {
+          "signedTransaction": {
+            "type": "string",
+            "description": "Signed transaction (hex string)",
+            "example": "0x..."
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 43114
+          },
+          "rpcUrl": {
+            "type": "string",
+            "description": "RPC URL for broadcasting (optional)",
+            "example": "https://api.avax.network/ext/bc/C/rpc"
+          }
+        },
+        "required": [
+          "signedTransaction",
+          "chainId"
+        ]
+      },
+      "TransactionStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID",
+            "example": "tx-uuid-abc123"
+          },
+          "txHash": {
+            "type": "string",
+            "description": "Transaction hash (if broadcasted)",
+            "example": "0x789..."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status",
+            "example": "broadcasted"
+          },
+          "broadcastedAt": {
+            "type": "string",
+            "description": "Broadcast timestamp",
+            "example": "2024-01-01T12:10:00Z"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "description": "Confirmation timestamp",
+            "example": "2024-01-01T12:10:15Z"
+          },
+          "blockNumber": {
+            "type": "number",
+            "description": "Block number",
+            "example": 12345678
+          },
+          "confirmations": {
+            "type": "number",
+            "description": "Number of confirmations",
+            "example": 3
+          }
+        },
+        "required": [
+          "transactionId",
+          "status"
         ]
       }
     }
